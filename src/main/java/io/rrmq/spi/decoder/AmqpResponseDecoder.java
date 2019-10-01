@@ -1,19 +1,24 @@
-package io.rrmq.spi;
+package io.rrmq.spi.decoder;
 
 import com.rabbitmq.client.AMQP;
 import io.netty.buffer.ByteBuf;
-import io.rrmq.spi.deserializer.ProtocolClassDecode;
+import io.rrmq.spi.AmqpResponse;
+import io.rrmq.spi.decoder.protocol.ProtocolClassDecode;
 
 
 public class AmqpResponseDecoder {
 
     public static AmqpResponse decode(ByteBuf in) {
-        short type = in.readUnsignedByte();
-        if (type == 'A') {
-            protocolVersionMismatch(in);
+        try {
+            short type = in.readUnsignedByte();
+            if (type == 'A') {
+                protocolVersionMismatch(in);
+            }
+            int channel = in.readUnsignedShort();
+            return deserializeBody(type, (short) channel, in);
+        } finally {
+             in.release();
         }
-        int channel = in.readUnsignedShort();
-        return deserializeBody(type, (short) channel, in);
     }
 
     private static AmqpResponse deserializeBody(short type, short channel, ByteBuf in) {

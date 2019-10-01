@@ -1,7 +1,7 @@
 package io.rrmq.spi.utils;
 
 
-import static io.rrmq.spi.AmqpResponseDecoder.MessageType.FRAME_METHOD;
+import static io.rrmq.spi.decoder.AmqpResponseDecoder.MessageType.FRAME_METHOD;
 
 public abstract class AmqpBuilder<T extends AmqpBuilder<T, R>, R> {
 

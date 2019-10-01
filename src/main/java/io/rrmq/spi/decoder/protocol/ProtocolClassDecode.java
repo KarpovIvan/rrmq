@@ -1,8 +1,9 @@
-package io.rrmq.spi.deserializer;
+package io.rrmq.spi.decoder.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.rrmq.spi.AmqpResponse;
-import io.rrmq.spi.deserializer.method.ConnectionMethodDecoder;
+import io.rrmq.spi.decoder.method.ChannelMethodDecoder;
+import io.rrmq.spi.decoder.method.ConnectionMethodDecoder;
 import io.rrmq.spi.method.ProtocolClassType;
 
 public class ProtocolClassDecode {
@@ -12,7 +13,8 @@ public class ProtocolClassDecode {
         switch(ProtocolClassType.valueOf(in.readShort())) {
             case CONNECTION:
                 return ConnectionMethodDecoder.decode(type, channel, in);
-//            case CHANEL:
+            case CHANEL:
+                return ChannelMethodDecoder.decode(type, channel, in);
 //            case ACCESS:
 //            case EXCHANGE:
 //            case QUEUE:

@@ -15,8 +15,6 @@ import reactor.core.publisher.FluxSink;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.rrmq.spi.AmqpResponseDecoder.MessageType.REPLY_SUCCESS;
-
 public class StartupMessageFlow {
 
     final static String COPYRIGHT = "Copyright (c) 2007-2019 Pivotal Software, Inc.";
@@ -24,51 +22,47 @@ public class StartupMessageFlow {
 
     public static Flux<AmqpResponse> exchange(Client client) {
         EmitterProcessor<AmqpRequest> requestProcessor = EmitterProcessor.create();
-        FluxSink<AmqpRequest> sink = requestProcessor.sink();
+        FluxSink<AmqpRequest> requests = requestProcessor.sink();
         return client.exchange(requestProcessor.startWith(new ProtocolAmqpMethod()))
-                .doOnNext(amqpResponse -> {
-                    if (amqpResponse instanceof Start) {
-                        sinkStartMethod(sink, amqpResponse);
-                    } else if (amqpResponse instanceof Tune) {
-                        sinkTuneAndOpen(sink, amqpResponse);
+                .handle((response, sink) -> {
+                    if (response instanceof Start) {
+                        SaslMechanism saslMechanism = DefaultSaslConfig.PLAIN.getSaslMechanism(
+                                ((Start) response).getMechanisms()
+                                        .toString()
+                                        .split(" ")
+                        );
+                        requests.next(
+                                StartOkAmqpMethod.builder()
+                                        .setChannel(response.getChannel())
+                                        .setClientProperties(amqpProperties())
+                                        .setMechanism(saslMechanism.getName())
+                                        .setResponse(saslMechanism.handleChallenge(null, "guest", "guest"))
+                                        .build()
+                        );
+                    } else if (response instanceof Tune) {
+                        Tune tune = (Tune) response;
+                        requests.next(
+                                TuneOkAmqpMethod.builder()
+                                        .setChannel(response.getChannel())
+                                        .setChannelMax(tune.getChannelMax())
+                                        .setFrameMax(tune.getFrameMax())
+                                        .setHeartMax(tune.getHeartbeat())
+                                        .build()
+                        );
+                        requests.next(
+                                OpenAmqpMethod.builder()
+                                        .setChannel(response.getChannel())
+                                        .setVirtualHost("/")
+                                        .setCapabilities("")
+                                        .build()
+                        );
+                    } else if (response instanceof OpenOk){
+                        requests.complete();
+                    } else {
+                        sink.next(response);
                     }
                 });
 
-    }
-
-    private static void sinkTuneAndOpen(FluxSink<AmqpRequest> sink, AmqpResponse amqpResponse) {
-        Tune tune = (Tune) amqpResponse;
-        sink.next(
-                TuneOkAmqpMethod.builder()
-                        .setChannel(amqpResponse.getChannel())
-                        .setChannelMax(tune.getChannelMax())
-                        .setFrameMax(tune.getFrameMax())
-                        .setHeartMax(tune.getHeartbeat())
-                        .build()
-        );
-        sink.next(
-                OpenAmqpMethod.builder()
-                        .setChannel(amqpResponse.getChannel())
-                        .setVirtualHost("/")
-                        .setCapabilities("")
-                        .build()
-        );
-    }
-
-    private static void sinkStartMethod(FluxSink<AmqpRequest> sink, AmqpResponse amqpResponse) {
-        SaslMechanism saslMechanism = DefaultSaslConfig.PLAIN.getSaslMechanism(
-                ((Start) amqpResponse).getMechanisms()
-                        .toString()
-                        .split(" ")
-        );
-        sink.next(
-                StartOkAmqpMethod.builder()
-                        .setChannel(amqpResponse.getChannel())
-                        .setClientProperties(amqpProperties())
-                        .setMechanism(saslMechanism.getName())
-                        .setResponse(saslMechanism.handleChallenge(null, "guest", "guest"))
-                .build()
-        );
     }
 
 

@@ -1,5 +1,7 @@
 package io.rrmq.spi;
 
+import io.rrmq.spi.connection.AmqpConnectionConfiguration;
+import io.rrmq.spi.connection.AmqpConnectionFactory;
 import io.rrmq.spi.method.connection.OpenOk;
 import io.rrmq.spi.method.connection.Start;
 import io.rrmq.spi.method.connection.Tune;
@@ -17,6 +19,8 @@ public class AmqpConnectionTest {
     private static final String LOCALHOST = "localhost";
     private static final int PORT = 5672;
 
+    private AmqpConnectionFactory amqpConnectionFactory = new AmqpConnectionFactory(new AmqpConnectionConfiguration(LOCALHOST, PORT));
+
     @Test
     public void testConnection() {
         StepVerifier.withVirtualTime(() -> AmqpReactorNettyClient.connect(LOCALHOST, PORT)
@@ -26,6 +30,15 @@ public class AmqpConnectionTest {
                 .assertNext(response ->  assertThat(response, instanceOf(OpenOk.class)))
                 .expectError()
                 .verify(TIME_OUT);
+    }
+
+    @Test
+    public void createChannel() throws InterruptedException {
+        amqpConnectionFactory.create()
+                .flatMap(amqpConnection -> amqpConnection.createChannel())
+                .subscribe();
+
+        Thread.sleep(100000L);
     }
 
 }

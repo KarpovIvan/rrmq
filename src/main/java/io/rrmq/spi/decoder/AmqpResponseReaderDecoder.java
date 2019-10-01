@@ -1,4 +1,4 @@
-package io.rrmq.spi;
+package io.rrmq.spi.decoder;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class AmqpResponseReaderDecoder implements Function<ByteBuf, Publisher<CompositeByteBuf>> {
@@ -17,6 +18,8 @@ public class AmqpResponseReaderDecoder implements Function<ByteBuf, Publisher<Co
     private final CompositeByteBuf byteBuf;
 
     private final AtomicBoolean disposed = new AtomicBoolean();
+
+    private final AtomicInteger test = new AtomicInteger();
 
     public AmqpResponseReaderDecoder(ByteBufAllocator byteBuf) {
         this.byteBuf = byteBuf.compositeBuffer();
@@ -29,17 +32,16 @@ public class AmqpResponseReaderDecoder implements Function<ByteBuf, Publisher<Co
         this.byteBuf.addComponent(true, in);
         this.byteBuf.retain();
 
-
-
         return EmitterProcessor.<CompositeByteBuf>create(sink -> {
             try {
 
-                //CompositeByteBuf envelope = getEnvelope(this.byteBuf);
-                //while (envelope != null) {
-                sink.next(this.byteBuf);
-                    //envelope = getEnvelope();
-                //}
-                //sink.complete();
+                CompositeByteBuf envelope = getEnvelope(this.byteBuf);
+                while (envelope != null) {
+                    System.out.println(test.getAndIncrement());
+                    sink.next(envelope);
+                    envelope = getEnvelope(this.byteBuf);
+                }
+                sink.complete();
             } finally {
                 this.byteBuf.discardReadComponents();
             }
@@ -54,10 +56,12 @@ public class AmqpResponseReaderDecoder implements Function<ByteBuf, Publisher<Co
             return null;
         }
 
-        int length = 1 + in.getInt(in.readerIndex() + 1);
+        int length = 3 + in.getInt(3) + 4 + 1;
         if (in.readableBytes() < length) {
             return null;
         }
+
+        System.out.println(length);
 
         return readComposite(in, length);
     }
@@ -77,7 +81,7 @@ public class AmqpResponseReaderDecoder implements Function<ByteBuf, Publisher<Co
 
     public void dispose() {
         if (this.disposed.compareAndSet(false, true)) {
-           // ReferenceCountUtil.release(this.byteBuf);
+             ReferenceCountUtil.release(this.byteBuf);
         }
     }
 }

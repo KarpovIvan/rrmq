@@ -23,6 +23,7 @@ public class AmqpFrameUtils {
 
             out.writeInt(counter.get());
             out.writeBytes(payload);
+            payload.release();
 
             out.writeByte(AMQP.FRAME_END);
 

@@ -1,4 +1,4 @@
-package io.rrmq.spi.deserializer.method;
+package io.rrmq.spi.decoder.method;
 
 import io.netty.buffer.ByteBuf;
 import io.rrmq.spi.AmqpResponse;

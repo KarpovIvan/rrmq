@@ -5,8 +5,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
+import io.rrmq.spi.decoder.AmqpResponseDecoder;
+import io.rrmq.spi.decoder.AmqpResponseReaderDecoder;
 import io.rrmq.spi.exception.CloseAmqpConnectionException;
 import io.rrmq.spi.method.connection.CloseOk;
+import io.rrmq.spi.method.connection.OpenOk;
 import io.rrmq.spi.method.connection.impl.CloseAmqpMethod;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
@@ -20,11 +23,13 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-import static io.rrmq.spi.AmqpResponseDecoder.MessageType.REPLY_SUCCESS;
+import static io.rrmq.spi.decoder.AmqpResponseDecoder.MessageType.REPLY_SUCCESS;
 
 public class AmqpReactorNettyClient implements Client {
 
@@ -86,10 +91,11 @@ public class AmqpReactorNettyClient implements Client {
 
         Mono<Void> receive = connection.inbound().receive()
                 .retain()
+                .concatMap(envelopeDecoder)
                 .map(AmqpResponseDecoder::decode)
                 .doOnNext(message -> System.out.println("Response: " + message))
-                .handle(this.handleCloseOkResponse)
-                .windowWhile(AmqpResponse.class::isInstance)
+                .handle(getAmqpResponseSynchronousSinkBiConsumer())
+                .windowWhile(not(OpenOk.class::isInstance))
                 .doOnNext(fluxOfMessages -> {
                     MonoSink<Flux<AmqpResponse>> receiver = this.responseReceivers.poll();
                     if (receiver != null) {
@@ -121,6 +127,10 @@ public class AmqpReactorNettyClient implements Client {
                 .subscribe();
 
         this.connection.set(connection);
+    }
+
+    private BiConsumer<AmqpResponse, SynchronousSink<AmqpResponse>> getAmqpResponseSynchronousSinkBiConsumer() {
+        return (response, synchronousSink) -> synchronousSink.next(response);
     }
 
     @Override
@@ -155,12 +165,19 @@ public class AmqpReactorNettyClient implements Client {
                         sink.error(new IllegalStateException("Cannot exchange messages because the connection is closed"));
                     }
 
+                    final AtomicInteger once = new AtomicInteger();
+
+
                     Flux.from(requests)
                             .subscribe(message -> {
-                                synchronized (this) {
-                                    this.responseReceivers.add(sink);
-                                    this.requests.next(message);
+                                if (once.get() == 0 && once.compareAndSet(0, 1)) {
+                                    synchronized (this) {
+                                        this.responseReceivers.add(sink);
+                                        this.requests.next(message);
+                                    }
+                                    return;
                                 }
+                                this.requests.next(message);
                             }, this.requests::error);
 
                 })
@@ -228,6 +245,11 @@ public class AmqpReactorNettyClient implements Client {
                 sink.next(message);
             }
         };
+    }
+
+    public static <T> Predicate<T> not(Predicate<T> t) {
+
+        return t.negate();
     }
 
 }
