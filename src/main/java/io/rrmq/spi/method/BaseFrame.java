@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rrmq.spi.AmqpRequest;
 import io.rrmq.spi.AmqpResponse;
+import io.rrmq.spi.utils.AmqpBuilder;
 import io.rrmq.spi.utils.AmqpFrameUtils;
 import org.reactivestreams.Publisher;
 
@@ -20,6 +21,11 @@ public abstract class BaseFrame implements AmqpResponse, AmqpRequest {
     public BaseFrame(short type, short channel) {
         this.type = type;
         this.channel = channel;
+    }
+
+    public BaseFrame(AmqpBuilder<?,?> builder) {
+        this.type = builder.getType();
+        this.channel = builder.getChannel();
     }
 
     @Override
