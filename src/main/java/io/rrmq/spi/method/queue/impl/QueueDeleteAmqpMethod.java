@@ -79,9 +79,7 @@ public class QueueDeleteAmqpMethod extends BaseFrame implements QueueDelete {
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
         writeShort((short) this.ticket, out, counter);
         writeShortstr(this.queue, out, counter);
-        writeBit(this.ifUnused, out, counter);
-        writeBit(this.ifEmpty, out, counter);
-        writeBit(this.nowait, out, counter);
+        writeBits(out, counter, this.ifUnused, this.ifEmpty, this.nowait);
     }
 
     @Override

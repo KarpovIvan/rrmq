@@ -1,4 +1,6 @@
 package io.rrmq.spi.method.exchange;
 
-public interface DeclareOk {
+import io.rrmq.spi.method.connection.FluxFinish;
+
+public interface DeclareOk extends FluxFinish {
 }

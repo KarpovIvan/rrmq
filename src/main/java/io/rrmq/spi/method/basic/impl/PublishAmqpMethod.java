@@ -80,8 +80,7 @@ public class PublishAmqpMethod extends BaseFrame implements Publish {
         writeShort((short) this.ticket, out, counter);
         writeShortstr(this.exchange, out, counter);
         writeShortstr(this.routingKey, out, counter);
-        writeBit(this.mandatory, out, counter);
-        writeBit(this.immediate, out, counter);
+        writeBits(out, counter, this.mandatory, this.immediate);
     }
 
     @Override

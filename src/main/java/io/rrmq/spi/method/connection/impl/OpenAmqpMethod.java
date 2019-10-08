@@ -8,8 +8,7 @@ import io.rrmq.spi.utils.AmqpBuilder;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.rrmq.spi.method.AmqpReadUtils.readShortstr;
-import static io.rrmq.spi.method.AmqpWriteUtils.writeBit;
-import static io.rrmq.spi.method.AmqpWriteUtils.writeShortstr;
+import static io.rrmq.spi.method.AmqpWriteUtils.*;
 import static io.rrmq.spi.method.ProtocolClassType.CONNECTION;
 import static io.rrmq.spi.method.connection.ConnectionMethodType.OPEN;
 
@@ -104,7 +103,7 @@ public class OpenAmqpMethod extends BaseFrame implements Open {
     public void writeMethodValues(ByteBuf out, AtomicInteger counter) {
         writeShortstr(this.virtualHost, out, counter);
         writeShortstr(this.capabilities, out, counter);
-        writeBit(this.insist, out, counter);
+        writeBits(out, counter, this.insist);
     }
 
     public static Open of(short type, short channel, ByteBuf in) {

@@ -43,10 +43,6 @@ public class QueueBindAmqpMethod extends BaseFrame implements QueueBind {
         this.arguments = builder.arguments;
     }
 
-    public static AmqpResponse of(short type, short channel, ByteBuf in) {
-        return new QueueBindAmqpMethod(type, channel, in);
-    }
-
     @Override
     public int getTicket() {
         return this.ticket;
@@ -93,7 +89,7 @@ public class QueueBindAmqpMethod extends BaseFrame implements QueueBind {
         writeShortstr(this.queue, out, counter);
         writeShortstr(this.exchange, out, counter);
         writeShortstr(this.routingKey, out, counter);
-        writeBit(this.nowait, out, counter);
+        writeBits(out, counter, this.nowait);
         writeTable(this.arguments, out, counter);
     }
 
@@ -107,6 +103,14 @@ public class QueueBindAmqpMethod extends BaseFrame implements QueueBind {
                 ", nowait=" + nowait +
                 ", arguments=" + arguments +
                 "} " + super.toString();
+    }
+
+    public static QueueBindBuilder<?> builder() {
+        return new QueueBindBuilder<>();
+    }
+
+    public static AmqpResponse of(short type, short channel, ByteBuf in) {
+        return new QueueBindAmqpMethod(type, channel, in);
     }
 
     public static class QueueBindBuilder<T extends QueueBindBuilder<T>> extends AmqpBuilder<T, QueueBindAmqpMethod> {

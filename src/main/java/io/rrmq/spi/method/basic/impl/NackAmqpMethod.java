@@ -9,8 +9,7 @@ import io.rrmq.spi.utils.AmqpBuilder;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.rrmq.spi.method.AmqpReadUtils.readLonglong;
-import static io.rrmq.spi.method.AmqpWriteUtils.writeBit;
-import static io.rrmq.spi.method.AmqpWriteUtils.writeLonglong;
+import static io.rrmq.spi.method.AmqpWriteUtils.*;
 import static io.rrmq.spi.method.ProtocolClassType.BASIC;
 import static io.rrmq.spi.method.basic.BasicMethodType.NACK;
 
@@ -62,8 +61,7 @@ public class NackAmqpMethod extends BaseFrame implements Nack {
     @Override
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
         writeLonglong(this.deliveryTag, out, counter);
-        writeBit(this.multiple, out, counter);
-        writeBit(this.requeue, out, counter);
+        writeBits(out, counter, this.multiple, this.requeue);
     }
 
     @Override

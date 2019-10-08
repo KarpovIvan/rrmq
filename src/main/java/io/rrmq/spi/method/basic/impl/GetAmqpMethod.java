@@ -62,7 +62,7 @@ public class GetAmqpMethod extends BaseFrame implements Get {
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
         writeShort((short) this.ticket, out, counter);
         writeShortstr(this.queue, out, counter);
-        writeBit(this.noAck, out, counter);
+        writeBits(out, counter, this.noAck);
     }
 
     @Override

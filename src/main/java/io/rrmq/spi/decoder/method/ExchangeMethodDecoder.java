@@ -10,21 +10,21 @@ public class ExchangeMethodDecoder {
     public static AmqpResponse decode(short type, short channel, ByteBuf in) {
         switch (ExchangeMethodType.valueOf(in.readShort())) {
             case DECLARE:
-                DeclareAmqpMethod.of(type, channel, in);
+                return ExchangeDeclareAmqpMethod.of(type, channel, in);
             case DECLARE_OK:
-                DeclareOkAmqpMethod.of(type, channel);
+                return DeclareOkAmqpMethod.of(type, channel);
             case DELETE:
-                DeleteAmqpMethod.of(type, channel, in);
+                return DeleteAmqpMethod.of(type, channel, in);
             case DELETE_OK:
-                DeleteOkAmqpMethod.of(type, channel);
+                return DeleteOkAmqpMethod.of(type, channel);
             case BIND:
-                BindAmqpMethod.of(type, channel, in);
+                return ExchangeBindAmqpMethod.of(type, channel, in);
             case BIND_OK:
-                BindOkAmqpMethod.of(type, channel);
+                return BindOkAmqpMethod.of(type, channel);
             case UNBIND:
-                UnbindAmqpMethod.of(type, channel, in);
+                return UnbindAmqpMethod.of(type, channel, in);
             case UNBIND_OK:
-                UnbindOkAmqpMethod.of(type, channel);
+                return UnbindOkAmqpMethod.of(type, channel);
             default:
                 return null;
         }

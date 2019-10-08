@@ -3,7 +3,9 @@ package io.rrmq.spi.utils;
 import com.rabbitmq.client.AMQP;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.Unpooled;
 import io.rrmq.spi.AmqpRequest;
+import io.rrmq.spi.method.queue.impl.QueueDeclareAmqpMethod;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.atomic.AtomicInteger;

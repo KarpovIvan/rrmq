@@ -10,41 +10,41 @@ public class BasicMethodDecoder {
     public static AmqpResponse decode(short type, short channel, ByteBuf in) {
         switch (BasicMethodType.valueOf(in.readShort())) {
             case QOS:
-                QosAmqpMethod.of(type, channel, in);
+                return QosAmqpMethod.of(type, channel, in);
             case QOS_OK:
-                QosOkAmqpMethod.of(type, channel, in);
+                return QosOkAmqpMethod.of(type, channel, in);
             case CONSUME:
-                ConsumeAmqpMethod.of(type, channel, in);
+                return ConsumeAmqpMethod.of(type, channel, in);
             case CONSUME_OK:
-                ConsumeOkAmqpMethod.of(type, channel, in);
+                return ConsumeOkAmqpMethod.of(type, channel, in);
             case CANCEL:
-                CancelAmqpMethod.of(type, channel, in);
+                return CancelAmqpMethod.of(type, channel, in);
             case CANCEL_OK:
-                CancelOkAmqpMethod.of(type, channel, in);
+                return CancelOkAmqpMethod.of(type, channel, in);
             case PUBLISH:
-                PublishAmqpMethod.of(type, channel, in);
+                return PublishAmqpMethod.of(type, channel, in);
             case RETURN:
-                ReturnAmqpMethod.of(type, channel, in);
+                return ReturnAmqpMethod.of(type, channel, in);
             case DELIVERY:
-                DeliverAmqpMethod.of(type, channel, in);
+                return DeliverAmqpMethod.of(type, channel, in);
             case GET:
-                GetAmqpMethod.of(type, channel, in);
+                return GetAmqpMethod.of(type, channel, in);
             case GET_OK:
-                GetOkAmqpMethod.of(type, channel, in);
+                return GetOkAmqpMethod.of(type, channel, in);
             case GET_EMPTY:
-                GetEmptyAmqpMethod.of(type, channel, in);
+                return GetEmptyAmqpMethod.of(type, channel, in);
             case ACK:
-                AckAmqpMethod.of(type, channel, in);
+                return AckAmqpMethod.of(type, channel, in);
             case REJECT:
-                RejectAmqpMethod.of(type, channel, in);
+                return RejectAmqpMethod.of(type, channel, in);
             case RECOVER_ASYNC:
-                RecoverAsyncAmqpMethod.of(type, channel, in);
+                return RecoverAsyncAmqpMethod.of(type, channel, in);
             case RECOVER:
-                RecoverAmqpMethod.of(type, channel, in);
+                return RecoverAmqpMethod.of(type, channel, in);
             case RECOVER_OK:
-                RecoverOkAmqpMethod.of(type, channel);
+                return RecoverOkAmqpMethod.of(type, channel);
             case NACK:
-                NackAmqpMethod.of(type, channel, in);
+                return NackAmqpMethod.of(type, channel, in);
             default:
                 return null;
         }

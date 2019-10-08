@@ -11,9 +11,9 @@ public class ConfirmMethodDecoder {
     public static AmqpResponse decode(short type, short channel, ByteBuf in) {
         switch (ConfirmMethodType.valueOf(in.readShort())) {
             case SELECT:
-                SelectAmqpMethod.of(type, channel, in);
+                return SelectAmqpMethod.of(type, channel, in);
             case SELECT_OK:
-                SelectOkAmqpMethod.of(type, channel);
+                return SelectOkAmqpMethod.of(type, channel);
             default:
                 return null;
         }

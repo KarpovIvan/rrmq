@@ -62,7 +62,7 @@ public class QosAmqpMethod extends BaseFrame implements Qos {
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
         writeLong(this.prefetchSize, out, counter);
         writeShort((short) this.prefetchCount, out, counter);
-        writeBit(this.global, out, counter);
+        writeBits(out, counter, this.global);
     }
 
     @Override

@@ -8,9 +8,16 @@ import io.netty.channel.ChannelOption;
 import io.rrmq.spi.decoder.AmqpResponseDecoder;
 import io.rrmq.spi.decoder.AmqpResponseReaderDecoder;
 import io.rrmq.spi.exception.CloseAmqpConnectionException;
+import io.rrmq.spi.method.channel.ChannelOpenOk;
+import io.rrmq.spi.method.channel.impl.ChannelOpenOkAmqpMethod;
 import io.rrmq.spi.method.connection.CloseOk;
+import io.rrmq.spi.method.connection.FluxFinish;
 import io.rrmq.spi.method.connection.OpenOk;
 import io.rrmq.spi.method.connection.impl.CloseAmqpMethod;
+import io.rrmq.spi.method.exchange.impl.DeclareOkAmqpMethod;
+import io.rrmq.spi.method.queue.QueueDeclareOk;
+import io.rrmq.spi.method.queue.impl.QueueDeclareAmqpMethod;
+import io.rrmq.spi.method.queue.impl.QueueDeclareOkAmqpMethod;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
 import reactor.netty.Connection;
@@ -20,6 +27,7 @@ import reactor.util.annotation.Nullable;
 import reactor.util.concurrent.Queues;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -94,12 +102,11 @@ public class AmqpReactorNettyClient implements Client {
                 .concatMap(envelopeDecoder)
                 .map(AmqpResponseDecoder::decode)
                 .doOnNext(message -> System.out.println("Response: " + message))
-                .handle(getAmqpResponseSynchronousSinkBiConsumer())
-                .windowWhile(not(OpenOk.class::isInstance))
+                .windowWhile(not(FluxFinish.class::isInstance))
                 .doOnNext(fluxOfMessages -> {
                     MonoSink<Flux<AmqpResponse>> receiver = this.responseReceivers.poll();
                     if (receiver != null) {
-                        receiver.success(fluxOfMessages);
+                        receiver.success(fluxOfMessages.doOnNext(response -> System.out.println(receiver + "=" + response)));
                     }
                 })
                 .doOnComplete(() -> {
@@ -247,9 +254,15 @@ public class AmqpReactorNettyClient implements Client {
         };
     }
 
-    public static <T> Predicate<T> not(Predicate<T> t) {
-
+    public static <T> Predicate<T> not(Predicate<T> t) {;
         return t.negate();
+    }
+
+    @SafeVarargs
+    @SuppressWarnings("varargs")
+    public static <T> Predicate<T> and(Predicate<T>... ts) {
+
+        return Arrays.stream(ts).reduce(Predicate::and).orElseThrow(() -> new IllegalStateException("Unable to combine predicates together via logical OR"));
     }
 
 }

@@ -21,6 +21,11 @@ public class ChannelOpenOkAmqpMethod extends BaseFrame implements ChannelOpenOk 
         this.channelId = readLongstr(in);
     }
 
+    protected ChannelOpenOkAmqpMethod(ChannelOpenOkAmqpMethod method) {
+        super(method.getType(), method.getChannel());
+        this.channelId = method.channelId;
+    }
+
     @Override
     public LongString getChannelId() {
         return channelId;

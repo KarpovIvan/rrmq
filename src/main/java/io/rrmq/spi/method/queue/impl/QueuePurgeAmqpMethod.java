@@ -63,7 +63,7 @@ public class QueuePurgeAmqpMethod extends BaseFrame implements QueuePurge {
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
         writeShort((short) this.ticket, out, counter);
         writeShortstr(this.queue, out, counter);
-        writeBit(this.nowait, out, counter);
+        writeBits(out, counter, this.nowait);
     }
 
     @Override

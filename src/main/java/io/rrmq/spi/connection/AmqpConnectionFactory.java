@@ -2,8 +2,7 @@ package io.rrmq.spi.connection;
 
 import io.rrmq.spi.AmqpReactorNettyClient;
 import io.rrmq.spi.Client;
-import io.rrmq.spi.StartupMessageFlow;
-import io.rrmq.spi.exception.AmqpExceptionFactory;
+import io.rrmq.spi.flow.StartupMessageFlow;
 import reactor.core.publisher.Mono;
 
 public class AmqpConnectionFactory implements ConnectionFactory {
@@ -23,7 +22,8 @@ public class AmqpConnectionFactory implements ConnectionFactory {
     @Override
     public Mono<AmqpConnection> create() {
         return this.clientFactory
-                .delayUntil(client -> StartupMessageFlow.exchange(client))
+                .delayUntil(StartupMessageFlow::exchange)
                 .flatMap(client -> Mono.fromSupplier(() -> new AmqpConnection(client)));
     }
+
 }

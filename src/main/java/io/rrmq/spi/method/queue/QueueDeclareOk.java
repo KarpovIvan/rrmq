@@ -1,6 +1,8 @@
 package io.rrmq.spi.method.queue;
 
-public interface QueueDeclareOk {
+import io.rrmq.spi.method.connection.FluxFinish;
+
+public interface QueueDeclareOk extends FluxFinish {
 
     String getQueue();
     int getMessageCount();

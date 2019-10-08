@@ -103,11 +103,7 @@ public class QueueDeclareAmqpMethod extends BaseFrame implements QueueDeclare {
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
         writeShort((short) this.ticket, out, counter);
         writeShortstr(this.queue, out, counter);
-        writeBit(this.passive, out, counter);
-        writeBit(this.durable, out, counter);
-        writeBit(this.exclusive, out, counter);
-        writeBit(this.autoDelete, out, counter);
-        writeBit(this.nowait, out, counter);
+        writeBits(out, counter, this.passive, this.durable, this.exclusive, this.autoDelete, this.nowait);
         writeTable(this.arguments, out, counter);
     }
 
@@ -123,6 +119,10 @@ public class QueueDeclareAmqpMethod extends BaseFrame implements QueueDeclare {
                 ", nowait=" + nowait +
                 ", arguments=" + arguments +
                 "} " + super.toString();
+    }
+
+    public static QueueDeclareBuilder<?> builder() {
+        return new QueueDeclareBuilder<>();
     }
 
     public static class QueueDeclareBuilder<T extends QueueDeclareBuilder<T>> extends AmqpBuilder<T, QueueDeclareAmqpMethod> {

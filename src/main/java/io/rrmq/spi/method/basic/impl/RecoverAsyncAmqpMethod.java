@@ -8,6 +8,7 @@ import io.rrmq.spi.method.basic.RecoverAsync;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.rrmq.spi.method.AmqpWriteUtils.writeBit;
+import static io.rrmq.spi.method.AmqpWriteUtils.writeBits;
 import static io.rrmq.spi.method.ProtocolClassType.BASIC;
 import static io.rrmq.spi.method.basic.BasicMethodType.RECOVER_ASYNC;
 
@@ -41,7 +42,7 @@ public class RecoverAsyncAmqpMethod extends BaseFrame implements RecoverAsync {
 
     @Override
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
-        writeBit(this.requeue, out, counter);
+        writeBits(out, counter, this.requeue);
     }
 
     @Override

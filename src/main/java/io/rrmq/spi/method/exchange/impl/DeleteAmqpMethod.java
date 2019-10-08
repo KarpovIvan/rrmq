@@ -61,8 +61,7 @@ public class DeleteAmqpMethod extends BaseFrame implements Delete {
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
         writeShort((short) this.ticket, out, counter);
         writeShortstr(this.exchange, out, counter);
-        writeBit(this.ifUnused, out, counter);
-        writeBit(this.nowait, out, counter);
+        writeBits(out, counter, this.ifUnused, this.nowait);
     }
 
     @Override

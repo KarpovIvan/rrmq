@@ -9,8 +9,7 @@ import io.rrmq.spi.utils.AmqpBuilder;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.rrmq.spi.method.AmqpReadUtils.readShortstr;
-import static io.rrmq.spi.method.AmqpWriteUtils.writeBit;
-import static io.rrmq.spi.method.AmqpWriteUtils.writeShortstr;
+import static io.rrmq.spi.method.AmqpWriteUtils.*;
 import static io.rrmq.spi.method.ProtocolClassType.BASIC;
 import static io.rrmq.spi.method.basic.BasicMethodType.CANCEL;
 
@@ -43,7 +42,7 @@ public class CancelAmqpMethod extends BaseFrame implements Cancel {
     @Override
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
         writeShortstr(this.consumerTag, out, counter);
-        writeBit(this.nowait, out, counter);
+        writeBits(out, counter, this.nowait);
     }
 
     @Override

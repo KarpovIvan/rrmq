@@ -88,7 +88,7 @@ public class UnbindAmqpMethod extends BaseFrame implements Unbind {
         writeShortstr(this.destination, out, counter);
         writeShortstr(this.source, out, counter);
         writeShortstr(this.routingKey, out, counter);
-        writeBit(this.nowait, out, counter);
+        writeBits(out, counter, this.nowait);
         writeTable(this.arguments, out, counter);
     }
 

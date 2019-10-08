@@ -3,7 +3,7 @@ package io.rrmq.spi.method.exchange.impl;
 import io.netty.buffer.ByteBuf;
 import io.rrmq.spi.AmqpResponse;
 import io.rrmq.spi.method.BaseFrame;
-import io.rrmq.spi.method.exchange.Bind;
+import io.rrmq.spi.method.exchange.ExchangeBind;
 import io.rrmq.spi.utils.AmqpBuilder;
 
 import java.util.Map;
@@ -14,7 +14,7 @@ import static io.rrmq.spi.method.AmqpWriteUtils.*;
 import static io.rrmq.spi.method.ProtocolClassType.EXCHANGE;
 import static io.rrmq.spi.method.exchange.ExchangeMethodType.BIND;
 
-public class BindAmqpMethod extends BaseFrame implements Bind {
+public class ExchangeBindAmqpMethod extends BaseFrame implements ExchangeBind {
 
     private final int ticket;
     private final String destination;
@@ -23,7 +23,7 @@ public class BindAmqpMethod extends BaseFrame implements Bind {
     private final boolean nowait;
     private final Map<String,Object> arguments;
 
-    private BindAmqpMethod(BindAmqpBuilder<?> builder) {
+    private ExchangeBindAmqpMethod(BindAmqpBuilder<?> builder) {
         super(builder);
         this.ticket = builder.ticket;
         this.destination = builder.destination;
@@ -33,7 +33,7 @@ public class BindAmqpMethod extends BaseFrame implements Bind {
         this.arguments = builder.arguments;
     }
 
-    private BindAmqpMethod(short type, short channel, ByteBuf in) {
+    private ExchangeBindAmqpMethod(short type, short channel, ByteBuf in) {
         super(type, channel);
         this.ticket = readShort(in);
         this.destination = readShortstr(in);
@@ -78,7 +78,7 @@ public class BindAmqpMethod extends BaseFrame implements Bind {
         writeShortstr(this.destination, out, counter);
         writeShortstr(this.source, out, counter);
         writeShortstr(this.routingKey, out, counter);
-        writeBit(this.nowait, out, counter);
+        writeBits(out, counter, this.nowait);
         writeTable(this.arguments, out, counter);
     }
 
@@ -109,10 +109,10 @@ public class BindAmqpMethod extends BaseFrame implements Bind {
     }
 
     public static AmqpResponse of(short type, short channel, ByteBuf in) {
-        return new BindAmqpMethod(type, channel, in);
+        return new ExchangeBindAmqpMethod(type, channel, in);
     }
 
-    public static class BindAmqpBuilder<T extends BindAmqpBuilder<T>> extends AmqpBuilder<T, BindAmqpMethod> {
+    public static class BindAmqpBuilder<T extends BindAmqpBuilder<T>> extends AmqpBuilder<T, ExchangeBindAmqpMethod> {
 
         private int ticket;
         private String destination;
@@ -152,8 +152,8 @@ public class BindAmqpMethod extends BaseFrame implements Bind {
         }
 
         @Override
-        public BindAmqpMethod build() {
-            return new BindAmqpMethod(self());
+        public ExchangeBindAmqpMethod build() {
+            return new ExchangeBindAmqpMethod(self());
         }
     }
 

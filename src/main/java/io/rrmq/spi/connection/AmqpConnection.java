@@ -3,6 +3,9 @@ package io.rrmq.spi.connection;
 import io.rrmq.spi.AmqpResponse;
 import io.rrmq.spi.Client;
 import io.rrmq.spi.flow.ChannelMessageFlow;
+import io.rrmq.spi.method.channel.Channel;
+import io.rrmq.spi.method.channel.impl.BaseChannel;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class AmqpConnection implements Connection {
@@ -14,8 +17,9 @@ public class AmqpConnection implements Connection {
     }
 
     @Override
-    public Mono<AmqpResponse> createChannel() {
-        return ChannelMessageFlow.exchange(client);
+    public Mono<Channel> createChannel() {
+        return ChannelMessageFlow.exchange(client)
+                .then(Mono.just(new BaseChannel(client)));
     }
 
     @Override

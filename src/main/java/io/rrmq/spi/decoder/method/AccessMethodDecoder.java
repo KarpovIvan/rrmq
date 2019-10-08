@@ -11,9 +11,9 @@ public class AccessMethodDecoder {
     public static AmqpResponse decode(short type, short channel, ByteBuf in) {
         switch (AccessMethodType.valueOf(in.readShort())) {
             case REQUEST:
-                RequestAmqpMethod.of(type, channel, in);
+                return RequestAmqpMethod.of(type, channel, in);
             case REQUEST_OK:
-                RequestOkAmqpMethod.of(type, channel, in);
+                return RequestOkAmqpMethod.of(type, channel, in);
             default:
                 return null;
         }

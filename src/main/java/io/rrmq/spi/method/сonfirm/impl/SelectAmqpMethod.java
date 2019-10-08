@@ -8,6 +8,7 @@ import io.rrmq.spi.method.сonfirm.Select;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.rrmq.spi.method.AmqpWriteUtils.writeBit;
+import static io.rrmq.spi.method.AmqpWriteUtils.writeBits;
 import static io.rrmq.spi.method.ProtocolClassType.CONFIRM;
 import static io.rrmq.spi.method.сonfirm.ConfirmMethodType.SELECT;
 
@@ -41,7 +42,7 @@ public class SelectAmqpMethod extends BaseFrame implements Select {
 
     @Override
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
-        writeBit(this.nowait, out, counter);
+        writeBits(out, counter, this.nowait);
     }
 
     @Override

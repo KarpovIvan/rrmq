@@ -1,8 +1,10 @@
 package io.rrmq.spi.method.exchange;
 
+import io.rrmq.spi.AmqpRequest;
+
 import java.util.Map;
 
-public interface Declare {
+public interface ExchangeDeclare extends AmqpRequest {
     int getTicket();
     String getExchange();
     String getExchangeType();

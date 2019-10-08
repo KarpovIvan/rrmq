@@ -9,8 +9,7 @@ import io.rrmq.spi.utils.AmqpBuilder;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.rrmq.spi.method.AmqpReadUtils.readShortstr;
-import static io.rrmq.spi.method.AmqpWriteUtils.writeBit;
-import static io.rrmq.spi.method.AmqpWriteUtils.writeShortstr;
+import static io.rrmq.spi.method.AmqpWriteUtils.*;
 import static io.rrmq.spi.method.ProtocolClassType.ACCESS;
 import static io.rrmq.spi.method.access.AccessMethodType.REQUEST;
 
@@ -85,11 +84,7 @@ public class RequestAmqpMethod extends BaseFrame implements Request {
     @Override
     public void writeValues(ByteBuf out, AtomicInteger counter) {
         writeShortstr(this.realm, out, counter);
-        writeBit(this.exclusive, out, counter);
-        writeBit(this.passive, out, counter);
-        writeBit(this.active, out, counter);
-        writeBit(this.write, out, counter);
-        writeBit(this.read, out, counter);
+        writeBits(out, counter, this.exclusive, this.passive, this.active, this.write, this.read);
     }
 
     @Override

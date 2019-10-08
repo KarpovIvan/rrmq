@@ -14,6 +14,7 @@ public class AmqpResponseDecoder {
             if (type == 'A') {
                 protocolVersionMismatch(in);
             }
+            System.out.println(true);
             int channel = in.readUnsignedShort();
             return deserializeBody(type, (short) channel, in);
         } finally {

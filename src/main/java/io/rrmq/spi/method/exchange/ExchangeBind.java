@@ -1,8 +1,10 @@
 package io.rrmq.spi.method.exchange;
 
+import io.rrmq.spi.AmqpRequest;
+
 import java.util.Map;
 
-public interface Bind {
+public interface ExchangeBind extends AmqpRequest {
     int getTicket();
     String getDestination();
     String getSource();

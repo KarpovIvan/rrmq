@@ -7,6 +7,7 @@ import io.rrmq.spi.method.channel.ChannelFlowOk;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.rrmq.spi.method.AmqpWriteUtils.writeBit;
+import static io.rrmq.spi.method.AmqpWriteUtils.writeBits;
 import static io.rrmq.spi.method.ProtocolClassType.CHANEL;
 import static io.rrmq.spi.method.channel.ChannelMethodType.FLOW_OK;
 
@@ -36,7 +37,7 @@ public class ChannelFlowOkAmqpMethod extends BaseFrame implements ChannelFlowOk 
 
     @Override
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
-        writeBit(active, out, counter);
+        writeBits(out, counter, active);
     }
 
     public static ChannelFlowOk of(short type, short channel, ByteBuf in) {

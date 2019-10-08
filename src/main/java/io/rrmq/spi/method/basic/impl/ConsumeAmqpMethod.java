@@ -90,10 +90,7 @@ public class ConsumeAmqpMethod extends BaseFrame implements Consume {
         writeShort((short) this.ticket, out, counter);
         writeShortstr(this.queue, out, counter);
         writeShortstr(this.consumerTag, out, counter);
-        writeBit(this.noLocal, out, counter);
-        writeBit(this.noAck, out, counter);
-        writeBit(this.exclusive, out, counter);
-        writeBit(this.nowait, out, counter);
+        writeBits(out, counter, this.noLocal, this.noAck, this.exclusive, this.nowait);
         writeTable(this.arguments, out, counter);
     }
 

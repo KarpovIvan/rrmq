@@ -1,6 +1,9 @@
-package io.rrmq.spi;
+package io.rrmq.spi.flow;
 
 import com.rabbitmq.client.impl.ClientVersion;
+import io.rrmq.spi.AmqpRequest;
+import io.rrmq.spi.AmqpResponse;
+import io.rrmq.spi.Client;
 import io.rrmq.spi.helper.LongStringHelper;
 import io.rrmq.spi.method.connection.OpenOk;
 import io.rrmq.spi.method.connection.Start;

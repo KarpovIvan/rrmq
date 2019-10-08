@@ -75,7 +75,7 @@ public class GetOkAmqpMethod extends BaseFrame implements GetOk {
     @Override
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
         writeLonglong(this.deliveryTag, out, counter);
-        writeBit(this.redelivered, out, counter);
+        writeBits(out, counter, this.redelivered);
         writeShortstr(this.exchange, out, counter);
         writeShortstr(this.routingKey, out, counter);
         writeLong(this.messageCount, out, counter);

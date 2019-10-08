@@ -68,7 +68,7 @@ public class DeliverAmqpMethod extends BaseFrame implements Deliver {
     protected void writeMethodValues(ByteBuf out, AtomicInteger counter) {
         writeShortstr(this.consumerTag, out, counter);
         writeLonglong(this.deliveryTag, out, counter);
-        writeBit(this.redelivered, out, counter);
+        writeBits(out, counter, this.redelivered);
         writeShortstr(this.exchange, out, counter);
         writeShortstr(this.routingKey, out, counter);
     }
