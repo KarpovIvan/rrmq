@@ -3,6 +3,7 @@ package io.rrmq.spi.method;
 import io.netty.buffer.ByteBuf;
 import io.rrmq.spi.helper.LongString;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -29,6 +30,23 @@ public class AmqpWriteUtils {
                 writeFieldValue(value, out, counter);
             }
         }
+    }
+
+    public static void writePresences(ByteBuf out, AtomicInteger counter, boolean... presents) {
+        int flagWord = 0;
+        int bitCount = 0;
+        for (boolean present : presents) {
+            if (bitCount == 15) {
+                writeShort((short) (flagWord | 1), out, counter);
+            }
+
+            if (present) {
+                int bit = 15 - bitCount;
+                flagWord = flagWord | (1 << bit);
+            }
+            bitCount++;
+        }
+        writeShort((short) flagWord, out, counter);
     }
 
 

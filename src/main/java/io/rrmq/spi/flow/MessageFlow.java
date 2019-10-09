@@ -13,4 +13,8 @@ public class MessageFlow {
         return client.exchange(Mono.just(queueDeclare));
     }
 
+    public static Flux<AmqpResponse> exchange(Client client, AmqpRequest... queueDeclare) {
+        return client.exchange(Flux.just(queueDeclare));
+    }
+
 }

@@ -96,8 +96,8 @@ public class AmqpResponseDecoder {
             this.discriminator = discriminator;
         }
 
-        public int getDiscriminator() {
-            return discriminator;
+        public short getDiscriminator() {
+            return (short) discriminator;
         }
 
         static MessageType valueOf(int b) {
