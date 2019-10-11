@@ -9,7 +9,8 @@ import io.rrmq.spi.utils.AmqpBuilder;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.rrmq.spi.method.AmqpReadUtils.readShortstr;
-import static io.rrmq.spi.method.AmqpWriteUtils.*;
+import static io.rrmq.spi.method.AmqpWriteUtils.writeBits;
+import static io.rrmq.spi.method.AmqpWriteUtils.writeShortstr;
 import static io.rrmq.spi.method.ProtocolClassType.BASIC;
 import static io.rrmq.spi.method.basic.BasicMethodType.CANCEL;
 

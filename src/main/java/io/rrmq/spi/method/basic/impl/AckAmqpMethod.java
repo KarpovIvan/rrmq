@@ -9,7 +9,8 @@ import io.rrmq.spi.utils.AmqpBuilder;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.rrmq.spi.method.AmqpReadUtils.readLonglong;
-import static io.rrmq.spi.method.AmqpWriteUtils.*;
+import static io.rrmq.spi.method.AmqpWriteUtils.writeBits;
+import static io.rrmq.spi.method.AmqpWriteUtils.writeLonglong;
 import static io.rrmq.spi.method.ProtocolClassType.BASIC;
 import static io.rrmq.spi.method.basic.BasicMethodType.ACK;
 
@@ -62,6 +63,10 @@ public class AckAmqpMethod extends BaseFrame implements Ack {
                 "deliveryTag=" + deliveryTag +
                 ", multiple=" + multiple +
                 "} " + super.toString();
+    }
+
+    public static AckAmqpBuilder<?> builder() {
+        return new AckAmqpBuilder<>();
     }
 
     public static AmqpResponse of(short type, short channel, ByteBuf in) {

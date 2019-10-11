@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.rrmq.spi.method.AmqpWriteUtils.writeShort;
 
-public abstract class BaseFrame implements AmqpResponse, AmqpRequest {
+public abstract class BaseFrame implements AmqpResponse, AmqpRequest{
 
     private final short type;
 

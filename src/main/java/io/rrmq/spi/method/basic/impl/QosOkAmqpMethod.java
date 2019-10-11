@@ -24,6 +24,11 @@ public class QosOkAmqpMethod extends BaseFrame implements QosOk {
         return QOS_OK.getDiscriminator();
     }
 
+    @Override
+    public String toString() {
+        return "QosOkAmqpMethod{} " + super.toString();
+    }
+
     public static AmqpResponse of(short type, short channel, ByteBuf in) {
         return new QosOkAmqpMethod(type, channel);
     }

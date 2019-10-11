@@ -7,7 +7,6 @@ import io.rrmq.spi.method.сonfirm.Select;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static io.rrmq.spi.method.AmqpWriteUtils.writeBit;
 import static io.rrmq.spi.method.AmqpWriteUtils.writeBits;
 import static io.rrmq.spi.method.ProtocolClassType.CONFIRM;
 import static io.rrmq.spi.method.сonfirm.ConfirmMethodType.SELECT;
@@ -56,7 +55,7 @@ public class SelectAmqpMethod extends BaseFrame implements Select {
         return new SelectAmqpMethod(type, channel, in);
     }
 
-    public static AmqpResponse of(short type, short channel,  boolean nowait) {
+    public static SelectAmqpMethod of(short type, short channel,  boolean nowait) {
         return new SelectAmqpMethod(type, channel, nowait);
     }
 }

@@ -3,7 +3,6 @@ package io.rrmq.spi.method;
 import io.netty.buffer.ByteBuf;
 import io.rrmq.spi.helper.LongString;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;

@@ -1,8 +1,10 @@
 package io.rrmq.spi.method.basic;
 
+import io.rrmq.spi.AmqpRequest;
+
 import java.util.Map;
 
-public interface Consume {
+public interface Consume extends AmqpRequest {
     int getTicket();
     String getQueue();
     String getConsumerTag();

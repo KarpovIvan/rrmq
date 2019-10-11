@@ -17,4 +17,8 @@ public class MessageFlow {
         return client.exchange(Flux.just(queueDeclare));
     }
 
+    public static Flux<AmqpResponse> exchange(Client client, Flux<AmqpRequest> amqpRequestFlux) {
+        return client.exchange(amqpRequestFlux);
+    }
+
 }

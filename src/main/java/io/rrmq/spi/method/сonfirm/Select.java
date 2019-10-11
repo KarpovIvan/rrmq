@@ -1,5 +1,7 @@
 package io.rrmq.spi.method.сonfirm;
 
-public interface Select {
+import io.rrmq.spi.AmqpRequest;
+
+public interface Select extends AmqpRequest {
     boolean isNowait();
 }

@@ -1,6 +1,8 @@
 package io.rrmq.spi.method.basic;
 
-public interface Ack {
+import io.rrmq.spi.method.connection.FluxFinish;
+
+public interface Ack extends FluxFinish {
     long getDeliveryTag();
     boolean isMultiple();
 }

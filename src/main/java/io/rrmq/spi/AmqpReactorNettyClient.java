@@ -8,16 +8,11 @@ import io.netty.channel.ChannelOption;
 import io.rrmq.spi.decoder.AmqpResponseDecoder;
 import io.rrmq.spi.decoder.AmqpResponseReaderDecoder;
 import io.rrmq.spi.exception.CloseAmqpConnectionException;
-import io.rrmq.spi.method.channel.ChannelOpenOk;
-import io.rrmq.spi.method.channel.impl.ChannelOpenOkAmqpMethod;
+import io.rrmq.spi.method.basic.Ack;
+import io.rrmq.spi.method.basic.impl.AckAmqpMethod;
 import io.rrmq.spi.method.connection.CloseOk;
 import io.rrmq.spi.method.connection.FluxFinish;
-import io.rrmq.spi.method.connection.OpenOk;
 import io.rrmq.spi.method.connection.impl.CloseAmqpMethod;
-import io.rrmq.spi.method.exchange.impl.DeclareOkAmqpMethod;
-import io.rrmq.spi.method.queue.QueueDeclareOk;
-import io.rrmq.spi.method.queue.impl.QueueDeclareAmqpMethod;
-import io.rrmq.spi.method.queue.impl.QueueDeclareOkAmqpMethod;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
 import reactor.netty.Connection;
@@ -26,6 +21,7 @@ import reactor.netty.tcp.TcpClient;
 import reactor.util.annotation.Nullable;
 import reactor.util.concurrent.Queues;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Optional;
@@ -91,6 +87,8 @@ public class AmqpReactorNettyClient implements Client {
     private AmqpReactorNettyClient(Connection connection) {
         //Assert.requireNonNull(connection, "Connection must not be null");
 
+       // connection.addHandler(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE - 5, 1, 4, -4, 0));
+
         connection.addHandler(new EnsureSubscribersCompleteChannelHandler(this.requestProcessor, this.responseReceivers));
 
         ByteBufAllocator alloc = connection.outbound().alloc();
@@ -106,7 +104,8 @@ public class AmqpReactorNettyClient implements Client {
                 .doOnNext(fluxOfMessages -> {
                     MonoSink<Flux<AmqpResponse>> receiver = this.responseReceivers.poll();
                     if (receiver != null) {
-                        receiver.success(fluxOfMessages.doOnNext(response -> System.out.println(receiver + "=" + response)));
+                        System.out.println("new Flux");
+                        receiver.success(fluxOfMessages);
                     }
                 })
                 .doOnComplete(() -> {
@@ -119,7 +118,18 @@ public class AmqpReactorNettyClient implements Client {
 
         Mono<Void> request = this.requestProcessor
                 .doOnNext(message -> System.out.println("Request: " + message))
-                .concatMap(message -> connection.outbound().send(message.encode(connection.outbound().alloc())))
+                .concatMap(message ->
+                        connection.outbound().send(message.encode(connection.outbound().alloc()))
+                                .then(Mono.fromRunnable(() -> {
+                                    if (message instanceof Ack) {
+                                        System.out.println(responseReceivers.size());
+                                        MonoSink<Flux<AmqpResponse>> receiver = this.responseReceivers.poll();
+                                        if (receiver != null) {
+                                            receiver.success(Flux.just(AckAmqpMethod.builder().build()));
+                                        }
+                                    }
+                                }))
+                )
                 .then();
 
         connection.onDispose()
@@ -130,7 +140,10 @@ public class AmqpReactorNettyClient implements Client {
                 .subscribe();
 
         Flux.merge(receive, request)
-                .onErrorResume(throwable -> close())
+                .onErrorResume(throwable -> {
+                    System.out.println(throwable.getMessage());
+                    return close();
+                })
                 .subscribe();
 
         this.connection.set(connection);
@@ -155,12 +168,13 @@ public class AmqpReactorNettyClient implements Client {
                             .setReplyText("OK")
                             .build()
             )
-            .doOnNext(message -> System.out.println("Response: " + message))
-            .concatMap(message -> connection.outbound().send(message.encode(connection.outbound().alloc())))
-            .then()
-            .doOnSuccess(v -> connection.dispose())
-            .then(connection.onDispose())
-            .doOnSuccess(v -> this.isClosed.set(true));
+                    .doOnNext(message -> System.out.println("Response: " + message))
+                    .concatMap(message -> connection.outbound().send(message.encode(connection.outbound().alloc())))
+                    .then()
+                    .doOnSuccess(v -> connection.dispose())
+                    .then(connection.onDispose())
+                    .doOnSuccess(v -> this.isClosed.set(true));
+
         });
     }
 
@@ -254,7 +268,8 @@ public class AmqpReactorNettyClient implements Client {
         };
     }
 
-    public static <T> Predicate<T> not(Predicate<T> t) {;
+    public static <T> Predicate<T> not(Predicate<T> t) {
+        ;
         return t.negate();
     }
 
@@ -263,6 +278,37 @@ public class AmqpReactorNettyClient implements Client {
     public static <T> Predicate<T> and(Predicate<T>... ts) {
 
         return Arrays.stream(ts).reduce(Predicate::and).orElseThrow(() -> new IllegalStateException("Unable to combine predicates together via logical OR"));
+    }
+
+    public static void main(String[] args) {
+        /* Total number of processors or cores available to the JVM */
+        System.out.println("Available processors (cores): " +
+                Runtime.getRuntime().availableProcessors());
+
+        /* Total amount of free memory available to the JVM */
+        System.out.println("Free memory (bytes): " +
+                Runtime.getRuntime().freeMemory());
+
+        /* This will return Long.MAX_VALUE if there is no preset limit */
+        long maxMemory = Runtime.getRuntime().maxMemory();
+        /* Maximum amount of memory the JVM will attempt to use */
+        System.out.println("Maximum memory (bytes): " +
+                (maxMemory == Long.MAX_VALUE ? "no limit" : maxMemory));
+
+        /* Total memory currently in use by the JVM */
+        System.out.println("Total memory (bytes): " +
+                Runtime.getRuntime().totalMemory());
+
+        /* Get a list of all filesystem roots on this system */
+        File[] roots = File.listRoots();
+
+        /* For each filesystem root, print some info */
+        for (File root : roots) {
+            System.out.println("File system root: " + root.getAbsolutePath());
+            System.out.println("Total space (bytes): " + root.getTotalSpace());
+            System.out.println("Free space (bytes): " + root.getFreeSpace());
+            System.out.println("Usable space (bytes): " + root.getUsableSpace());
+        }
     }
 
 }

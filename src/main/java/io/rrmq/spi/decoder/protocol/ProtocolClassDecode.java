@@ -8,7 +8,6 @@ import io.rrmq.spi.method.ProtocolClassType;
 public class ProtocolClassDecode {
 
     public static AmqpResponse decode(short type, short channel, ByteBuf in) {
-        int payloadSize = in.readInt();
         switch(ProtocolClassType.valueOf(in.readShort())) {
             case CONNECTION:
                 return ConnectionMethodDecoder.decode(type, channel, in);

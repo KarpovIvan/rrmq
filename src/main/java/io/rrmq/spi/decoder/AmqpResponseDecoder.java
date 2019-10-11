@@ -1,33 +1,35 @@
 package io.rrmq.spi.decoder;
 
-import com.rabbitmq.client.AMQP;
-import io.netty.buffer.ByteBuf;
+import io.netty.buffer.CompositeByteBuf;
+import io.rrmq.spi.AmqpHolder;
 import io.rrmq.spi.AmqpResponse;
+import io.rrmq.spi.BodyFrame;
+import io.rrmq.spi.EndAmqpResponse;
 import io.rrmq.spi.decoder.protocol.ProtocolClassDecode;
+import io.rrmq.spi.header.BasicProperties;
 
 
 public class AmqpResponseDecoder {
 
-    public static AmqpResponse decode(ByteBuf in) {
+    public static AmqpResponse decode(AmqpHolder amqpHolder) {
+        CompositeByteBuf payLoad = amqpHolder.getPayLoad();
         try {
-            short type = in.readUnsignedByte();
-            if (type == 'A') {
-                protocolVersionMismatch(in);
-            }
-            System.out.println(true);
-            int channel = in.readUnsignedShort();
-            return deserializeBody(type, (short) channel, in);
+            return deserializeBody(amqpHolder.getType(), amqpHolder.getChannel(), payLoad);
         } finally {
-             in.release();
+             payLoad.release();
         }
     }
 
-    private static AmqpResponse deserializeBody(short type, short channel, ByteBuf in) {
+    private static AmqpResponse deserializeBody(short type, short channel, CompositeByteBuf in) {
         switch (MessageType.valueOf(type)) {
             case FRAME_METHOD:
                 return ProtocolClassDecode.decode(type, channel, in);
-//            case FRAME_HEADER:
-//            case FRAME_BODY:
+            case FRAME_HEADER:
+                return BasicProperties.builder().build();
+            case FRAME_BODY:
+                return new BodyFrame(type, channel, in);
+            case END:
+                return new EndAmqpResponse();
 //            case FRAME_HEARTBEAT:
 //            case FRAME_MIN_SIZE:
 //            case FRAME_END:
@@ -88,7 +90,9 @@ public class AmqpResponseDecoder {
         RESOURCE_ERROR(506),
         NOT_ALLOWED(530),
         NOT_IMPLEMENTED(540),
-        INTERNAL_ERROR(541);
+        INTERNAL_ERROR(541),
+        //test
+        END(900);
 
         private final int discriminator;
 
@@ -106,52 +110,10 @@ public class AmqpResponseDecoder {
                     return messageType;
                 }
             }
-            throw new IllegalArgumentException(String.format("%c is not a valid message type", b));
+            throw new IllegalArgumentException(String.format("%s is not a valid message type", b));
         }
 
 
-    }
-
-
-    public static void protocolVersionMismatch(ByteBuf is) {
-        RuntimeException x;
-
-        // We expect the letters M, Q, P in that order: generate an informative error if they're not found
-        byte[] expectedBytes = new byte[]{'M', 'Q', 'P'};
-        for (byte expectedByte : expectedBytes) {
-            int nextByte = is.readUnsignedByte();
-            if (nextByte != expectedByte) {
-                throw new RuntimeException("Invalid AMQP protocol header from server: expected character " +
-                        expectedByte + ", got " + nextByte);
-            }
-        }
-
-        int[] signature = new int[4];
-
-        for (int i = 0; i < 4; i++) {
-            signature[i] = is.readUnsignedByte();
-        }
-
-        if (signature[0] == 1 &&
-                signature[1] == 1 &&
-                signature[2] == 8 &&
-                signature[3] == 0) {
-            x = new RuntimeException("AMQP protocol version mismatch; we are version " +
-                    AMQP.PROTOCOL.MAJOR + "-" + AMQP.PROTOCOL.MINOR + "-" + AMQP.PROTOCOL.REVISION +
-                    ", server is 0-8");
-        } else {
-            String sig = "";
-            for (int i = 0; i < 4; i++) {
-                if (i != 0) sig += ",";
-                sig += signature[i];
-            }
-
-            x = new RuntimeException("AMQP protocol version mismatch; we are version " +
-                    AMQP.PROTOCOL.MAJOR + "-" + AMQP.PROTOCOL.MINOR + "-" + AMQP.PROTOCOL.REVISION +
-                    ", server sent signature " + sig);
-        }
-
-        throw x;
     }
 
 }

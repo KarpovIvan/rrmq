@@ -6,7 +6,6 @@ import io.rrmq.spi.method.channel.ChannelFlow;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static io.rrmq.spi.method.AmqpWriteUtils.writeBit;
 import static io.rrmq.spi.method.AmqpWriteUtils.writeBits;
 import static io.rrmq.spi.method.ProtocolClassType.CHANEL;
 import static io.rrmq.spi.method.channel.ChannelMethodType.FLOW;

@@ -8,7 +8,10 @@ import io.rrmq.spi.helper.LongStringHelper;
 import io.rrmq.spi.method.connection.OpenOk;
 import io.rrmq.spi.method.connection.Start;
 import io.rrmq.spi.method.connection.Tune;
-import io.rrmq.spi.method.connection.impl.*;
+import io.rrmq.spi.method.connection.impl.OpenAmqpMethod;
+import io.rrmq.spi.method.connection.impl.ProtocolAmqpMethod;
+import io.rrmq.spi.method.connection.impl.StartOkAmqpMethod;
+import io.rrmq.spi.method.connection.impl.TuneOkAmqpMethod;
 import io.rrmq.spi.sasl.DefaultSaslConfig;
 import io.rrmq.spi.sasl.SaslMechanism;
 import reactor.core.publisher.EmitterProcessor;
@@ -59,7 +62,7 @@ public class StartupMessageFlow {
                                         .setCapabilities("")
                                         .build()
                         );
-                    } else if (response instanceof OpenOk){
+                    } else if (response instanceof OpenOk) {
                         requests.complete();
                     } else {
                         sink.next(response);

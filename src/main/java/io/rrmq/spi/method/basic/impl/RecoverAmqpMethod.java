@@ -3,13 +3,10 @@ package io.rrmq.spi.method.basic.impl;
 import io.netty.buffer.ByteBuf;
 import io.rrmq.spi.AmqpResponse;
 import io.rrmq.spi.method.BaseFrame;
-import io.rrmq.spi.method.ProtocolClassType;
-import io.rrmq.spi.method.basic.BasicMethodType;
 import io.rrmq.spi.method.basic.Recover;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static io.rrmq.spi.method.AmqpWriteUtils.writeBit;
 import static io.rrmq.spi.method.AmqpWriteUtils.writeBits;
 import static io.rrmq.spi.method.ProtocolClassType.BASIC;
 import static io.rrmq.spi.method.basic.BasicMethodType.RECOVER;

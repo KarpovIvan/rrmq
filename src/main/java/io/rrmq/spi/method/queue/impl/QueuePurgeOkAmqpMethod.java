@@ -3,8 +3,6 @@ package io.rrmq.spi.method.queue.impl;
 import io.netty.buffer.ByteBuf;
 import io.rrmq.spi.AmqpResponse;
 import io.rrmq.spi.method.BaseFrame;
-import io.rrmq.spi.method.ProtocolClassType;
-import io.rrmq.spi.method.queue.QueueMethodType;
 import io.rrmq.spi.method.queue.QueuePurgeOk;
 
 import java.util.concurrent.atomic.AtomicInteger;
