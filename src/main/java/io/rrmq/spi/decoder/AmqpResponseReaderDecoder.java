@@ -52,24 +52,13 @@ public class AmqpResponseReaderDecoder implements Function<ByteBuf, Publisher<Am
 
         int i = in.readableBytes();
 
-        System.out.println("readableBytes " + i);
-
-        if (i < 8) {
-            System.out.println("i<3");
+        if (i <= 7) {
             return null;
         }
 
         int payloadSize1 = in.getInt(in.readerIndex() + 3);
 
-        System.out.println(payloadSize1);
-
-        if (i < payloadSize1 + 8) {
-//            if (payloadSize1 > 10000) {
-//                byte[] bytes = new byte[i];
-//                in.readBytes(bytes);
-//                System.out.println(new String(bytes));
-//            }
-            System.out.println("i = " + i + " < payloadSize1 = " + payloadSize1);
+        if (i <= payloadSize1 + 7) {
             return null;
         }
 
@@ -86,18 +75,13 @@ public class AmqpResponseReaderDecoder implements Function<ByteBuf, Publisher<Am
 
         int payloadSize = in.readInt();
 
-        System.out.println("payloadSize = " + payloadSize);
-
-        if (i == 23) {
-            System.out.println();
-        }
-
         return readComposite(in, payloadSize, amqpHolder);
     }
 
     static AmqpHolder readComposite(CompositeByteBuf in, int length, AmqpHolder amqpHolder) {
         if (length == 0) {
-            amqpHolder.setPayLoad(in.alloc().compositeBuffer(1));
+            in.readUnsignedByte();
+            return null;
         } else {
             List<ByteBuf> decompose = in.decompose(in.readerIndex(), length);
             CompositeByteBuf byteBufs = in.alloc().compositeBuffer(decompose.size());

@@ -29,4 +29,6 @@ public interface Channel {
 
     Mono<Void> ack(Deliver deliver);
 
+    short channelId();
+
 }

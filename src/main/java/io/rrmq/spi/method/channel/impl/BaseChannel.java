@@ -16,7 +16,9 @@ import io.rrmq.spi.method.exchange.ExchangeDeclare;
 import io.rrmq.spi.method.queue.QueueBind;
 import io.rrmq.spi.method.queue.QueueDeclare;
 import io.rrmq.spi.method.сonfirm.impl.SelectAmqpMethod;
+import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
 import static io.rrmq.spi.decoder.AmqpResponseDecoder.MessageType.FRAME_METHOD;
@@ -25,8 +27,11 @@ public class BaseChannel implements Channel {
 
     private Client client;
 
-    public BaseChannel(Client client) {
+    private short channelId;
+
+    public BaseChannel(Client client, short channelId) {
         this.client = client;
+        this.channelId = channelId;
     }
 
     @Override
@@ -48,12 +53,12 @@ public class BaseChannel implements Channel {
     public Mono<Void> send(PublishAmqpMethod publishAmqpMethod, BasicProperties basicProperties, BodyFrame bodyFrame) {
         return MessageFlow.exchange(
                 client,
-                SelectAmqpMethod.of(FRAME_METHOD.getDiscriminator(), (short) 1, false),
+                SelectAmqpMethod.of(FRAME_METHOD.getDiscriminator(), channelId, false),
                 publishAmqpMethod,
                 basicProperties,
                 bodyFrame
         )
-        .then();
+                .then();
     }
 
     @Override
@@ -61,33 +66,29 @@ public class BaseChannel implements Channel {
         return MessageFlow.exchange(
                 client,
                 requests
-//                SelectAmqpMethod.of(FRAME_METHOD.getDiscriminator(), (short) 1, false),
-//                publishAmqpMethod,
-//                basicProperties,
-//                bodyFrame
         )
-        .then();
+                .then();
     }
 
     @Override
     public Flux<AmqpResponse> consume(ConsumeAmqpMethod consumeAmqpMethod) {
-        return MessageFlow.exchange(
-                client,
-                QosAmqpMethod.builder()
-                        .setChannel((short) 1)
+        EmitterProcessor<AmqpRequest> requestProcessor = EmitterProcessor.create();
+        FluxSink<AmqpRequest> requests = requestProcessor.sink();
+        return client.exchange(requestProcessor.startWith(QosAmqpMethod.builder()
+                        .setChannel(channelId)
                         .setGlobal(true)
-                        .setPrefetchCount(40)
+                        .setPrefetchCount(250)
                         .build(),
-                consumeAmqpMethod
+                consumeAmqpMethod)
         )
-        .delayUntil(response -> {
-            if (response instanceof Deliver) {
-                return ack((Deliver) response);
-            } else if(response instanceof BodyFrame) {
-                System.out.println(new String(((BodyFrame) response).getBody()));
-            }
-            return Mono.just(response);
-        });
+                .handle((response, synchronousSink) -> {
+                    if (response instanceof Deliver) {
+                        requests.next(AckAmqpMethod.builder()
+                                .setDeliveryTag(((Deliver) response).getDeliveryTag())
+                                .setChannel(channelId)
+                                .build());
+                    }
+                });
     }
 
     @Override
@@ -96,11 +97,16 @@ public class BaseChannel implements Channel {
                 client,
                 AckAmqpMethod.builder()
                         .setDeliveryTag(deliver.getDeliveryTag())
-                        .setChannel((short) 1)
+                        .setChannel(channelId)
                         .build())
-        .handle((response, synchronousSink) -> {
-            System.out.println("COMP!!");
-            synchronousSink.complete();
-        }).then();
+                .handle((response, synchronousSink) -> {
+                    System.out.println("COMP!!");
+                    synchronousSink.complete();
+                }).then();
+    }
+
+    @Override
+    public short channelId() {
+        return channelId;
     }
 }

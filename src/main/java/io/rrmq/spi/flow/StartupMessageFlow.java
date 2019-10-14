@@ -5,7 +5,6 @@ import io.rrmq.spi.AmqpRequest;
 import io.rrmq.spi.AmqpResponse;
 import io.rrmq.spi.Client;
 import io.rrmq.spi.helper.LongStringHelper;
-import io.rrmq.spi.method.connection.OpenOk;
 import io.rrmq.spi.method.connection.Start;
 import io.rrmq.spi.method.connection.Tune;
 import io.rrmq.spi.method.connection.impl.OpenAmqpMethod;
@@ -62,10 +61,8 @@ public class StartupMessageFlow {
                                         .setCapabilities("")
                                         .build()
                         );
-                    } else if (response instanceof OpenOk) {
-                        requests.complete();
                     } else {
-                        sink.next(response);
+                        requests.complete();
                     }
                 });
 
