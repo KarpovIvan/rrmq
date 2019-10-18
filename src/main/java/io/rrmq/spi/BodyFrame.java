@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.rrmq.spi.method.BaseFrame;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BodyFrame extends BaseFrame {
@@ -52,4 +53,24 @@ public class BodyFrame extends BaseFrame {
         return new BodyFrame(type, channel, body);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof BodyFrame))
+            return false;
+        BodyFrame bodyFrame = (BodyFrame) o;
+
+        if (!Arrays.equals(body, bodyFrame.body)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Arrays.hashCode(body);
+        return 31 * (result ^ (result >>> 16));
+    }
 }

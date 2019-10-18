@@ -1,5 +1,6 @@
 package io.rrmq.spi;
 
+import io.rrmq.spi.channel.ChannelPoolConfiguration;
 import io.rrmq.spi.connection.AmqpConnection;
 import io.rrmq.spi.connection.AmqpConnectionConfiguration;
 import io.rrmq.spi.connection.AmqpConnectionFactory;
@@ -9,6 +10,9 @@ import io.rrmq.spi.method.basic.impl.PublishAmqpMethod;
 import io.rrmq.spi.method.connection.OpenOk;
 import io.rrmq.spi.method.connection.Start;
 import io.rrmq.spi.method.connection.Tune;
+import io.rrmq.spi.method.exchange.impl.ExchangeDeclareAmqpMethod;
+import io.rrmq.spi.method.queue.impl.QueueBindAmqpMethod;
+import io.rrmq.spi.method.queue.impl.QueueDeclareAmqpMethod;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -26,7 +30,7 @@ public class AmqpConnectionTest {
     private static final String LOCALHOST = "localhost";
     private static final int PORT = 5672;
 
-    private AmqpConnectionFactory amqpConnectionFactory = new AmqpConnectionFactory(new AmqpConnectionConfiguration(LOCALHOST, PORT));
+    private AmqpConnectionFactory amqpConnectionFactory = new AmqpConnectionFactory(new AmqpConnectionConfiguration(LOCALHOST, PORT), new ChannelPoolConfiguration());
 
     @Test
     public void testConnection() {
@@ -47,9 +51,34 @@ public class AmqpConnectionTest {
         String exchange_1 = "exchange_4";
         amqpConnectionFactory.create()
                 .flatMap(AmqpConnection::createChannel)
+                .delayUntil(channel ->
+                        channel.declareQueue(
+                                QueueDeclareAmqpMethod.builder()
+                                        .setQueue(queue_1)
+                                        .setDurable(true)
+                                        .setChannel(channel.channelId())
+                                        .build()
+                        )
+                )
+                .delayUntil(channel -> channel.declareExchange(
+                        ExchangeDeclareAmqpMethod.builder()
+                                .setExchange(exchange_1)
+                                .setType("fanout")
+                                .setDurable(true)
+                                .setChannel(channel.channelId())
+                                .build())
+                )
+                .delayUntil(channel -> channel.declareBinding(
+                        QueueBindAmqpMethod.builder()
+                                .setQueue(queue_1)
+                                .setExchange(exchange_1)
+                                .setRoutingKey("")
+                                .setChannel(channel.channelId())
+                                .build()))
                 .delayUntil(channel -> channel.sendMany(Flux.create(sink -> {
                     short channelId = channel.channelId();
-                    for (int i = 0; i < 1000000; i++) {
+                    for (int i = 0; i < 2000000; i++) {
+
                         sink.next(PublishAmqpMethod.builder()
                                 .setChannel(channelId)
                                 .setExchange(exchange_1)

@@ -1,4 +1,4 @@
-package io.rrmq.spi.method.channel;
+package io.rrmq.spi.channel;
 
 import io.rrmq.spi.AmqpRequest;
 import io.rrmq.spi.AmqpResponse;
@@ -30,5 +30,7 @@ public interface Channel {
     Mono<Void> ack(Deliver deliver);
 
     short channelId();
+
+    Mono<Void> close();
 
 }

@@ -1,4 +1,4 @@
-package io.rrmq.spi.method.channel.impl;
+package io.rrmq.spi.channel;
 
 import io.rrmq.spi.AmqpRequest;
 import io.rrmq.spi.AmqpResponse;
@@ -11,7 +11,7 @@ import io.rrmq.spi.method.basic.impl.AckAmqpMethod;
 import io.rrmq.spi.method.basic.impl.ConsumeAmqpMethod;
 import io.rrmq.spi.method.basic.impl.PublishAmqpMethod;
 import io.rrmq.spi.method.basic.impl.QosAmqpMethod;
-import io.rrmq.spi.method.channel.Channel;
+import io.rrmq.spi.channel.Channel;
 import io.rrmq.spi.method.exchange.ExchangeDeclare;
 import io.rrmq.spi.method.queue.QueueBind;
 import io.rrmq.spi.method.queue.QueueDeclare;
@@ -108,5 +108,10 @@ public class BaseChannel implements Channel {
     @Override
     public short channelId() {
         return channelId;
+    }
+
+    @Override
+    public Mono<Void> close() {
+        return null;
     }
 }

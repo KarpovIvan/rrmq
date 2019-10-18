@@ -130,7 +130,6 @@ public class AmqpReactorNettyClient implements Client {
 
         connection.onDispose()
                 .doFinally(s -> {
-                    System.out.println(s);
                     envelopeDecoder.dispose();
                 })
                 .subscribe();

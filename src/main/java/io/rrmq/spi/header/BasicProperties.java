@@ -7,6 +7,7 @@ import io.rrmq.spi.utils.AmqpBuilder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.rrmq.spi.method.AmqpWriteUtils.*;
@@ -284,5 +285,32 @@ public class BasicProperties extends BaseFrame {
         public BasicProperties build() {
             return new BasicProperties(self());
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BasicProperties)) return false;
+        BasicProperties that = (BasicProperties) o;
+        return bodySize == that.bodySize &&
+                Objects.equals(contentType, that.contentType) &&
+                Objects.equals(contentEncoding, that.contentEncoding) &&
+                Objects.equals(headers, that.headers) &&
+                Objects.equals(deliveryMode, that.deliveryMode) &&
+                Objects.equals(priority, that.priority) &&
+                Objects.equals(correlationId, that.correlationId) &&
+                Objects.equals(replyTo, that.replyTo) &&
+                Objects.equals(expiration, that.expiration) &&
+                Objects.equals(messageId, that.messageId) &&
+                Objects.equals(timestamp, that.timestamp) &&
+                Objects.equals(type, that.type) &&
+                Objects.equals(userId, that.userId) &&
+                Objects.equals(appId, that.appId) &&
+                Objects.equals(clusterId, that.clusterId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bodySize, contentType, contentEncoding, headers, deliveryMode, priority, correlationId, replyTo, expiration, messageId, timestamp, type, userId, appId, clusterId);
     }
 }

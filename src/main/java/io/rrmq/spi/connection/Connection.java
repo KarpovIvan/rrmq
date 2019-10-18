@@ -1,6 +1,6 @@
 package io.rrmq.spi.connection;
 
-import io.rrmq.spi.method.channel.Channel;
+import io.rrmq.spi.channel.Channel;
 import reactor.core.publisher.Mono;
 
 public interface Connection {
